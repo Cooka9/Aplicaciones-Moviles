@@ -4,7 +4,6 @@ void main() {
   runApp(const MyApp());
 }
 
-//estructura base de la app (simo)
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
