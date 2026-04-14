@@ -12,9 +12,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Formulario de Registro',
-      //tema básico 
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       home: const RegistrationFormPage(),
@@ -22,7 +22,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Pantalla principal StatefulWidget (simo)
 class RegistrationFormPage extends StatefulWidget {
   const RegistrationFormPage({super.key});
 
@@ -30,49 +29,180 @@ class RegistrationFormPage extends StatefulWidget {
   State<RegistrationFormPage> createState() => _RegistrationFormPageState();
 }
 
-
 class _RegistrationFormPageState extends State<RegistrationFormPage> {
-  
-  // GlobalKey para el control del formulario 
   final _formKey = GlobalKey<FormState>();
 
-  // Controladores para capturar el texto (necesarios para el botón Limpiar, se usan mas abajo) 
-  final TextEditingController nombreController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController telefonoController = TextEditingController();
-  final TextEditingController edadController = TextEditingController();
-  final TextEditingController descripcionController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _ageController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  void _sendForm() {
+    if (_formKey.currentState!.validate()) {
+      debugPrint('--- DATOS CAPTURADOS ---');
+      debugPrint('Nombre: ${_nameController.text}');
+      debugPrint('Correo: ${_emailController.text}');
+      debugPrint('Teléfono: ${_phoneController.text}');
+      debugPrint('Edad: ${_ageController.text}');
+      debugPrint('Descripción: ${_descController.text}');
+      debugPrint('------------------------');
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Envío exitoso')));
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Debe corregir los campos')));
+    }
+  }
+
+  void _clearForm() {
+    _formKey.currentState!.reset();
+    _nameController.clear();
+    _emailController.clear();
+    _phoneController.clear();
+    _ageController.clear();
+    _descController.clear();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Formulario limpiado')));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Formulario de Registro"),
+        title: const Text('Formulario de Registro'),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-     
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          // Organizar los campos con un Column 
-          child: Column(
-            children: [
-              
-              // --- SECCIÓN PARA LUIS ---
-              // Implementar TextFormField de Nombre Completo 
-              // Implementar TextFormField de Correo Electrónico 
-
-              // --- SECCIÓN PARA ALVARO ---
-              // Implementar TextFormField de Teléfono 
-              // Implementar TextFormField de Edad 
-
-              // --- SECCIÓN PARA ALAN ---
-              // Implementar TextFormField de Descripción breve 
-
-              // --- SECCIÓN PARA EMILIO ---
-              // Agregar Row con botones Enviar y Limpiar 
-              
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _nameController,
+                  keyboardType: TextInputType.name,
+                  decoration: const InputDecoration(
+                    labelText: 'Nombre completo',
+                    hintText: 'Ingrese su nombre',
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Obligatorio';
+                    if (value.length < 3) return 'Mínimo 3 caracteres';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'Correo electrónico',
+                    hintText: 'ejemplo@correo.com',
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Obligatorio';
+                    if (!value.contains('@') || !value.contains('.')) {
+                      return 'Debe contener @ y un punto';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Teléfono',
+                    hintText: '987654321',
+                    prefixIcon: Icon(Icons.phone),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Obligatorio';
+                    final cleaned = value.replaceAll(RegExp(r'[\s-]'), '');
+                    if (cleaned.length < 8) return 'Mínimo 8 dígitos';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _ageController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Edad',
+                    hintText: '18 - 100',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Obligatorio';
+                    final age = int.tryParse(value);
+                    if (age == null || age < 18 || age > 100) {
+                      return 'Edad entre 18 y 100';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Descripción breve',
+                    hintText: 'Escriba algo sobre usted',
+                    prefixIcon: Icon(Icons.note),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Obligatorio';
+                    if (value.length < 10) return 'Mínimo 10 caracteres';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _sendForm,
+                        icon: const Icon(Icons.send),
+                        label: const Text('Enviar'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _clearForm,
+                        icon: const Icon(Icons.clear),
+                        label: const Text('Limpiar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
